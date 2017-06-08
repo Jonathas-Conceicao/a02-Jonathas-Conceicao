@@ -13,14 +13,18 @@ Declaro que o presente trabalho contém código desenvolvido exclusivamente por 
 
 ## Descrição
 
-Neste trabalho, os alunos irão desenvolver um programa em C para simular o funcionamento do gerenciamento de memória virtual em um sistema operacional.
-
+Neste trabalho, os alunos irão desenvolver um programa em C para simular o funcionamento do gerenciamento de memória virtual em um sistema operacional.s
 
 Cada processo começa com o mesmo número de quadros (total de quadros dividido número de processos arredondado para baixo), mas os processos devem ter seus números de quadros recalculados proporcionalmente ao tamanho de seus _working sets_ após cada intervalo especificado na entrada.
 
 O algoritmo para escolha de página vítima é o algoritmo de segunda chance (ou do relógio). Para cada processo, o algoritmo começa sempre pela primeira página acessada pelo processo. Novas páginas que não estavam em memória são incluídas na lista de páginas sempre antes da próxima página a ser avaliada. **Não esqueçam de manter um bit de referência para cada página**. 
 
-Os arquivos fornecidos pelo professor **não devem ser modificados**. Qualquer modificação não autorizada levará à redução da nota final.
+Os arquivos fornecidos pelo professor **não devem ser modificados**. Qualquer modificação não autorizada levará à redução da nota final. Nenhum diretório deverá ser criado no repositório. A convenção de nomes de arquivos de traços dos alunos será _t01.txt_, _t02.txt_, ... Não adicionem traços muito grandes ao repositório no Github (i.e. cuidem para não ultrapassar o total de 5 MiB para todos os traços).
+
+**IMPORTANTE**: 
+
+- Desabilitem o Travis na interface dele enquanto não estiverem com o trabalho pronto;
+- Usem o Github para manter as versões intermediárias do trabalho (ou seja, não façam apenas _upload_ da versão final). Trabalhos que não usarem o Github desta forma poderão ser **desconsiderados**.
 
 ### Entradas
 
