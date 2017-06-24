@@ -1,12 +1,14 @@
 CC=gcc
 
-CFLAGS=-g -O1 -std=c99 -pthread -lm
+CFLAGS=-g -O1 -std=c99 -pthread -Wall -Wextra -Werror
 
-all: test grade 
+all: test grade
 
-memvirt.o: 
+memvirt.o:
+	$(CC) $(CFLAGS) -c memvirt.c -o memvirt.o -lm
 
 teste: memvirt.o teste.c
+	$(CC) $(CFLAGS) teste.c -o teste -lm
 
 proftest: memvirt.o proftest.c
 
