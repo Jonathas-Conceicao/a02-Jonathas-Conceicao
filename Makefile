@@ -8,7 +8,7 @@ memvirt.o:
 	$(CC) $(CFLAGS) -c memvirt.c -o memvirt.o -lm
 
 teste: memvirt.o teste.c
-	$(CC) $(CFLAGS) teste.c -o teste -lm
+	$(CC) $(CFLAGS) teste.c memvirt.o -o teste -lm
 
 proftest: memvirt.o proftest.c
 
