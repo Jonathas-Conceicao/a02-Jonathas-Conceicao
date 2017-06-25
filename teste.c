@@ -12,7 +12,7 @@ void destryResult(struct result** pR) {
 
 void test1(void) {
   WHEN("Teste simples com 12 operações");
-  IF("Três processos sem recálculo de working set e sem page fault");
+  IF("Três processos sem recálculo de working set acessando apenas duas páginas");
 
   struct result *ret;
   ret = memvirt(5, 20, "t01.txt", 12);
@@ -23,12 +23,12 @@ void test1(void) {
   isEqual(ret->refs[1], 3, 1);
   THEN("Processo 2 deve ter 4 acessos");
   isEqual(ret->refs[2], 4, 1);
-  THEN("Todas devem ter 0 page faults e 0% de taxa");
-  isEqual(ret->pfs[0], 0, 1);
+  THEN("Todas devem ter 2 page faults e --% de taxa");
+  isEqual(ret->pfs[0], 2, 1);
   isEqual(ret->pf_rate[0], 0, 1);
-  isEqual(ret->pfs[1], 0, 1);
+  isEqual(ret->pfs[1], 2, 1);
   isEqual(ret->pf_rate[1], 0, 1);
-  isEqual(ret->pfs[2], 0, 1);
+  isEqual(ret->pfs[2], 2, 1);
   isEqual(ret->pf_rate[2], 0, 1);
 
   THEN("O working set médio deve ser 4");
