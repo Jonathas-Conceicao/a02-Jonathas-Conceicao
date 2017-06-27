@@ -4,7 +4,11 @@
 
 #ifndef _CICQUEUE_H_
 #define _CICQUEUE_H_
+
+#ifndef _SMALL_T_
+#define _SMALL_T_
 typedef unsigned short int small_t;
+#endif
 
 typedef struct element_ {
   int pageNum;
@@ -14,6 +18,7 @@ typedef struct element_ {
 typedef struct cicQueue_ {
   element_t *list;
   small_t arrow;
+  small_t nEle;
   small_t size;
 }cicQueue_t;
 
@@ -45,6 +50,7 @@ static void insertPage(cicQueue_t *q, int page) {
   (*q).list[(*q).arrow].pageNum = page;
   (*q).list[(*q).arrow].bitRef = 1;
   (*q).arrow++;
+  (*q).nEle++;
   if ((*q).arrow >= (*q).size)
     (*q).arrow = 0;
   return;
@@ -54,9 +60,9 @@ static void setArrowPos(cicQueue_t *q) { // Looks for a propper slot.
   while((*q).list[(*q).arrow].bitRef != 0) {
     (*q).list[(*q).arrow].bitRef = 0; // Gives a second chance.
     (*q).arrow++; // Goes to next position,
-    if ((*q).arrow >= (*q).size)
-      (*q).arrow = 0;
+    if ((*q).arrow >= (*q).size) (*q).arrow = 0;
   }
+  if ((*q).list[(*q).arrow].pageNum != 0) (*q).nEle--; // If page was not empty we are removing an element
   return;
 }
 
@@ -100,6 +106,7 @@ static cicQueue_t *initQueue(int size) {
     (*ret).list[i].bitRef = 0;
   }
   (*ret).arrow = 0;
+  (*ret).nEle = 0;
   (*ret).size = size;
   return ret;
 }

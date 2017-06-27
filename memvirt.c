@@ -4,6 +4,7 @@
 
 #include "memvirt.h"
 #include "cicQueue.c"
+#include "list.c"
 
 typedef struct result result_t;
 typedef unsigned short int small_t;
@@ -28,12 +29,12 @@ static void destryProcess(process_t **);
 static command_t getCommand(FILE *);
 
 struct result * memvirt(int num_procs, uint32_t num_frames, char * filename, uint32_t interval) {
-  (void)interval;
   result_t *ret;
   FILE *file;
   command_t cmd;
-  process_t **process;
-
+  process_t **process; // List of pointers
+  list_t *wsList;
+  (void)wsList;
   ret = initResult(num_procs);
   file = fopen(filename, "r");
   assert(file);
@@ -43,16 +44,21 @@ struct result * memvirt(int num_procs, uint32_t num_frames, char * filename, uin
     process[i] = initProcess((int) (num_frames/num_procs));
   }
 
+  uint32_t i = 0;
   int r;
   while (!feof(file)) {
     cmd = getCommand(file);
     if (cmd.control > 0) { // Check if read was sucessfull
-      resizeQueue(&process[cmd.pid]->queue, (int) (num_frames/num_procs));
+      if (i==interval) {
+        resizeQueue(&process[cmd.pid]->queue, (int) (num_frames/num_procs));
+        i = 0;
+      }
       r = accessPage(process[cmd.pid]->queue, cmd.pageNum);
       (*ret).refs[cmd.pid]++;
       if (r) {
         (*ret).pfs[cmd.pid]++;
       }
+      i++;
     }
   }
 
