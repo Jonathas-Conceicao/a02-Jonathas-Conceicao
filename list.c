@@ -10,17 +10,27 @@ typedef unsigned short int small_t;
 #endif
 
 typedef struct list_ {
-  uint32_t *list; // Array
+  uint32_t *array;
   small_t nEle;
   small_t size;
 }list_t;
 
 #endif
 
-list_t initList(small_t size) {
+list_t *initList(small_t size) {
   list_t *ret;
   ret = malloc(sizeof(list_t));
-  (*ret).list = malloc(sizeof(uint32_t) * size);
+  assert(ret);
+  (*ret).array = malloc(sizeof(uint32_t) * size);
+  assert((*ret).array);
   (*ret).size = size;
-  return (*ret);
+  (*ret).nEle = 0;
+  return ret;
+}
+
+void insertList(list_t *list, uint32_t x) {
+  if ((*list).size + 1 >= (*list).size) assert(1);
+  (*list).array[(*list).nEle] = x;
+  (*list).nEle += 1;
+  return;
 }

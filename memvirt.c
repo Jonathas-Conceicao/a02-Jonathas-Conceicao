@@ -34,7 +34,8 @@ struct result * memvirt(int num_procs, uint32_t num_frames, char * filename, uin
   command_t cmd;
   process_t **process; // List of pointers
   list_t *wsList;
-  (void)wsList;
+
+  wsList = initList(num_procs);
   ret = initResult(num_procs);
   file = fopen(filename, "r");
   assert(file);
@@ -42,6 +43,7 @@ struct result * memvirt(int num_procs, uint32_t num_frames, char * filename, uin
   assert(process);
   for (small_t i = 0; i < num_procs; ++i) {
     process[i] = initProcess((int) (num_frames/num_procs));
+    insertList(wsList, (int) (num_frames/num_procs));
   }
 
   uint32_t i = 0;
