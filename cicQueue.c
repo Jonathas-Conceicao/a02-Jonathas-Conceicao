@@ -11,7 +11,7 @@ typedef unsigned short int small_t;
 #endif
 
 typedef struct element_ {
-  int pageNum;
+  signed int pageNum;
   char bitRef; //
 }element_t;
 
@@ -22,19 +22,21 @@ typedef struct cicQueue_ {
   small_t size;
 }cicQueue_t;
 
-static cicQueue_t *initQueue(int);
-static void destryQueue(cicQueue_t **);
-static void resizeQueue(cicQueue_t**, int);
+cicQueue_t *initQueue(int);
+void destryQueue(cicQueue_t **);
+void resizeQueue(cicQueue_t**, signed int);
+void removeNElements(cicQueue_t**, unsigned int);
+void increaceInNElements(cicQueue_t**, unsigned int);
 
-static void insertPage(cicQueue_t *q, int page);
-static int findPage(cicQueue_t *, int);
-static void setArrowPos(cicQueue_t *);
+void insertPage(cicQueue_t *q, int page);
+int findPage(cicQueue_t *, int);
+void setArrowPos(cicQueue_t *);
 
-static int accessPage(cicQueue_t *, int);
+int accessPage(cicQueue_t *, int);
 
 #endif
 
-static int accessPage(cicQueue_t *q, int page) {
+int accessPage(cicQueue_t *q, int page) {
   int aux;
   aux = findPage(q, page);
   if (aux >= 0) { // Page was in the list.
@@ -45,7 +47,7 @@ static int accessPage(cicQueue_t *q, int page) {
   return 1;
 }
 
-static void insertPage(cicQueue_t *q, int page) {
+void insertPage(cicQueue_t *q, int page) {
   setArrowPos(q); // Look for a propper slot.
   (*q).list[(*q).arrow].pageNum = page;
   (*q).list[(*q).arrow].bitRef = 1;
@@ -56,17 +58,17 @@ static void insertPage(cicQueue_t *q, int page) {
   return;
 }
 
-static void setArrowPos(cicQueue_t *q) { // Looks for a propper slot.
+void setArrowPos(cicQueue_t *q) { // Looks for a propper slot.
   while((*q).list[(*q).arrow].bitRef != 0) {
     (*q).list[(*q).arrow].bitRef = 0; // Gives a second chance.
     (*q).arrow++; // Goes to next position,
     if ((*q).arrow >= (*q).size) (*q).arrow = 0;
   }
-  if ((*q).list[(*q).arrow].pageNum != 0) (*q).nEle--; // If page was not empty we are removing an element
+  if ((*q).list[(*q).arrow].pageNum != -1) (*q).nEle--; // If page was not empty we are removing an element
   return;
 }
 
-static int findPage(cicQueue_t *q, int page) {
+int findPage(cicQueue_t *q, int page) {
   for (small_t i = 0; i < (*q).size; ++i) {
     if ((*q).list[i].pageNum == page)
       return i;
@@ -74,35 +76,56 @@ static int findPage(cicQueue_t *q, int page) {
   return -1;
 }
 
-static void destryQueue(cicQueue_t **pQ) {
+void destryQueue(cicQueue_t **pQ) {
   free((*pQ)->list);
   free(*pQ);
   return;
 }
 
-static void resizeQueue(cicQueue_t **q, int newSize) {
+void removeNElements(cicQueue_t **q, unsigned int numOfElements) {
   assert(*q);
-  if (newSize == (*q)->size)
-    return;
-  (*q)->list = realloc((*q)->list, sizeof(element_t) * newSize);
-  for (int i = ((*q)->size)-1; i < newSize; ++i) { // Inicializar novas posições
-    (*q)->list[i].pageNum = 0;
+  if (numOfElements == 0) return;
+  setArrowPos(*q);
+  for (small_t i = (*q)->arrow; i < ((*q)->size -1); ++i) { // Pull all elements to the end one position behind
+    (*q)->list[i].pageNum = (*q)->list[i+1].pageNum;
+    (*q)->list[i].bitRef = (*q)->list[i+1].bitRef;
+  }
+  element_t *aux;
+  aux = realloc((*q)->list, sizeof(element_t) * ((*q)->size - 1)); // Resize's list o size-1
+  assert(aux);
+  (*q)->list = aux;
+  (*q)->size -=  1;
+  removeNElements(q, (numOfElements - 1)); // Just because recursion is fun
+}
+
+void increaceInNElements(cicQueue_t **q, unsigned int numOfElements) {
+  assert(*q);
+  element_t *aux;
+  aux = realloc((*q)->list, sizeof(element_t) * ((*q)->size + numOfElements));
+  assert(aux);
+  (*q)->list = aux;
+  for (unsigned int i = ((*q)->size)-1; i < ((*q)->size + numOfElements); ++i) { // Inicializar novas posições
+    (*q)->list[i].pageNum = -1; // Valor default para representar espaço vazio
     (*q)->list[i].bitRef = 0;
   }
-  if (newSize < (*q)->size)
-    (*q)->arrow = newSize-1;
-  (*q)->size = newSize;
+  (*q)->size += numOfElements;
+  (*q)->arrow = (*q)->size-1;
   return;
 }
 
-static cicQueue_t *initQueue(int size) {
+void resizeQueue(cicQueue_t **q, signed int resizeValue) {
+  (resizeValue > 0) ? increaceInNElements(q, abs(resizeValue)) : removeNElements(q, abs(resizeValue));
+  return;
+}
+
+cicQueue_t *initQueue(int size) {
   cicQueue_t *ret;
   ret = malloc(sizeof(cicQueue_t));
   assert(ret);
   (*ret).list = malloc(sizeof(element_t) * size);
   assert((*ret).list);
   for (small_t i = 0; i < size; ++i) {
-    (*ret).list[i].pageNum = 0;
+    (*ret).list[i].pageNum = -1; // Valor default para representar espaço vazio
     (*ret).list[i].bitRef = 0;
   }
   (*ret).arrow = 0;

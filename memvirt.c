@@ -20,13 +20,13 @@ typedef struct process_ {
   uint32_t workingSet;
 }process_t;
 
-static result_t *initResult(int);
+result_t *initResult(int);
 // void destryResult(struct result**);
 
-static process_t *initProcess(int);
-static void destryProcess(process_t **);
+process_t *initProcess(int);
+void destryProcess(process_t **);
 
-static command_t getCommand(FILE *);
+command_t getCommand(FILE *);
 
 struct result * memvirt(int num_procs, uint32_t num_frames, char * filename, uint32_t interval) {
   result_t *ret;
@@ -45,14 +45,14 @@ struct result * memvirt(int num_procs, uint32_t num_frames, char * filename, uin
     process[i] = initProcess((int) (num_frames/num_procs));
     insertList(wsList, (int) (num_frames/num_procs));
   }
-
+  interval = 0;
   uint32_t i = 0;
   int r;
   while (!feof(file)) {
     cmd = getCommand(file);
     if (cmd.control > 0) { // Check if read was sucessfull
       if (i==interval) {
-        resizeQueue(&process[cmd.pid]->queue, (int) (num_frames/num_procs));
+        resizeQueue(&process[cmd.pid]->queue, 0);
         i = 0;
       }
       r = accessPage(process[cmd.pid]->queue, cmd.pageNum);
@@ -64,34 +64,40 @@ struct result * memvirt(int num_procs, uint32_t num_frames, char * filename, uin
     }
   }
 
+  for (small_t i = 0; i < getSizeList(*wsList); ++i) {
+    (*ret).avg_ws += getElementAtList(*wsList, i);
+  }
+  (*ret).avg_ws /= getSizeList(*wsList);
+
   for (small_t i = 0; i < num_procs; ++i) {
     destryProcess(&process[i]);
   }
+  destryList(&wsList);
   free(process);
   fclose(file);
   return ret;
 }
 
-static command_t getCommand(FILE *f) {
+command_t getCommand(FILE *f) {
   command_t ret;
   ret.control = fscanf(f, "%i %i%*c", &ret.pid, &ret.pageNum);
   return ret;
 }
 
-// extern void destryResult(result_t** pR) {
+// void destryResult(result_t** pR) {
 //   free((*pR)->refs);
 //   free((*pR)->pfs);
 //   free((*pR)->pf_rate);
 //   free(*pR);
 // }
 
-static void destryProcess(process_t **p) {
+void destryProcess(process_t **p) {
   destryQueue(&(*p)->queue);
   free(*p);
   return;
 }
 
-static process_t *initProcess(int ws) {
+process_t *initProcess(int ws) {
   process_t *ret;
   ret = malloc(sizeof(process_t));
   assert(ret);
@@ -100,7 +106,7 @@ static process_t *initProcess(int ws) {
   return ret;
 }
 
-static result_t *initResult(int qntProc) {
+result_t *initResult(int qntProc) {
   result_t *ret;
   ret = malloc(sizeof(result_t));
   assert(ret);

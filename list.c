@@ -15,6 +15,15 @@ typedef struct list_ {
   small_t size;
 }list_t;
 
+void destryList(list_t **);
+list_t *initList(small_t);
+void resize(list_t *);
+
+small_t getSizeList(list_t);
+small_t getMaxSizeList(list_t);
+
+void insertList(list_t *, uint32_t);
+uint32_t getElementAtList(list_t, int);
 #endif
 
 list_t *initList(small_t size) {
@@ -28,9 +37,37 @@ list_t *initList(small_t size) {
   return ret;
 }
 
-void insertList(list_t *list, uint32_t x) {
-  if ((*list).size + 1 >= (*list).size) assert(1);
-  (*list).array[(*list).nEle] = x;
-  (*list).nEle += 1;
+void destryList(list_t **pPL) {
+  free((*pPL)->array);
+  free((*pPL));
   return;
+}
+
+uint32_t getElementAtList(list_t l, int index) {
+  assert(index < 0 ||
+         l.size > index);
+  return l.array[index];
+}
+
+void insertList(list_t *pL, uint32_t x) {
+  if ((*pL).size + 1 >= (*pL).size) resize(pL);
+  (*pL).array[(*pL).nEle] = x;
+  (*pL).nEle += 1;
+  return;
+}
+
+small_t getSizeList(list_t l) {
+  return l.nEle;
+}
+small_t getMaxSizeList(list_t l) {
+  return l.size;
+}
+
+void resize(list_t *pL) {
+  assert(pL);
+  uint32_t *aux;
+  aux = realloc((*pL).array, sizeof(uint32_t) * ((*pL).size * 2));
+  assert(aux);
+  (*pL).array = aux;
+  (*pL).size *= 2;
 }
