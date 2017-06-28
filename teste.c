@@ -15,7 +15,7 @@ void test1(void) {
   IF("Três processos sem recálculo de working set acessando apenas duas páginas");
 
   struct result *ret;
-  ret = memvirt(5, 20, "t01.txt", 12);
+  ret = memvirt(3, 9, "t01.txt", 12);
 
   THEN("Processo 0 deve ter 5 acessos");
   isEqual(ret->refs[0], 5, 1);
@@ -31,8 +31,8 @@ void test1(void) {
   isEqual(ret->pfs[2], 2, 1);
   isEqual(ret->pf_rate[2], 50.0, 1);
 
-  THEN("O working set médio deve ser 4");
-  isEqual(ret->avg_ws, 4, 1);
+  THEN("O working set médio deve ser 3");
+  isEqual(ret->avg_ws, 3, 1);
   THEN("O total de page fault deve ser 0%");
   isEqual(ret->total_pf_rate, 0, 1);
 

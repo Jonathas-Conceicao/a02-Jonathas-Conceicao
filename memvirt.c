@@ -3,8 +3,8 @@
 #include <assert.h>
 
 #include "memvirt.h"
-#include "cicQueue.c"
-#include "list.c"
+#include "cicQueue.c" // Tu sabes porque isso ta feio assim.
+#include "list.c" // Tu sabes porque isso ta feio assim.
 
 typedef struct result result_t;
 typedef unsigned short int small_t;
@@ -43,6 +43,7 @@ struct result * memvirt(int num_procs, uint32_t num_frames, char * filename, uin
   assert(process);
   for (small_t i = 0; i < num_procs; ++i) {
     process[i] = initProcess((int) (num_frames/num_procs));
+    process[i]->workingSet = (int) (num_frames/num_procs); // Initinal value of working sets
     insertList(wsList, (int) (num_frames/num_procs));
   }
   interval = 0;
@@ -54,6 +55,8 @@ struct result * memvirt(int num_procs, uint32_t num_frames, char * filename, uin
       if (i==interval) {
         resizeQueue(&process[cmd.pid]->queue, 0);
         i = 0;
+        for (small_t i = 0; i < num_procs; ++i) { // Updates number of frames for each process
+        }
       }
       r = accessPage(process[cmd.pid]->queue, cmd.pageNum);
       (*ret).refs[cmd.pid]++;
