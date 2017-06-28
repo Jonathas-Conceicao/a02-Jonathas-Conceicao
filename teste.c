@@ -25,11 +25,11 @@ void test1(void) {
   isEqual(ret->refs[2], 4, 1);
   THEN("Todas devem ter 2 page faults e --% de taxa");
   isEqual(ret->pfs[0], 2, 1);
-  isEqual(ret->pf_rate[0], 0, 1);
+  isEqual(ret->pf_rate[0], 40.0, 1);
   isEqual(ret->pfs[1], 2, 1);
-  isEqual(ret->pf_rate[1], 0, 1);
+  isEqual(ret->pf_rate[1], 66.6, 1);
   isEqual(ret->pfs[2], 2, 1);
-  isEqual(ret->pf_rate[2], 0, 1);
+  isEqual(ret->pf_rate[2], 50.0, 1);
 
   THEN("O working set médio deve ser 4");
   isEqual(ret->avg_ws, 4, 1);

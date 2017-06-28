@@ -70,6 +70,7 @@ struct result * memvirt(int num_procs, uint32_t num_frames, char * filename, uin
   (*ret).avg_ws /= getSizeList(*wsList);
 
   for (small_t i = 0; i < num_procs; ++i) {
+    (*ret).pf_rate[i] = ((float) (*ret).pfs[i]/(*ret).refs[i]) * 100;
     destryProcess(&process[i]);
   }
   destryList(&wsList);
