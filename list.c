@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdlib.h>
 #include <assert.h>
 
@@ -9,65 +10,75 @@
 typedef unsigned short int small_t;
 #endif
 
+typedef struct nodeList_ {
+  uint32_t element;
+  struct nodeList_ *next;
+}nodeList_t;
+
 typedef struct list_ {
-  uint32_t *array;
-  small_t nEle;
+  nodeList_t *head;
   small_t size;
 }list_t;
 
+list_t *initList();
 void destryList(list_t **);
-list_t *initList(small_t);
-void resize(list_t *);
 
-small_t getSizeList(list_t);
+small_t getNElemList(list_t);
 small_t getMaxSizeList(list_t);
 
 void insertList(list_t *, uint32_t);
-uint32_t getElementAtList(list_t, int);
+uint32_t getElementAtList(list_t, unsigned int);
+
 #endif
 
-list_t *initList(small_t size) {
+
+list_t *initList() {
   list_t *ret;
   ret = malloc(sizeof(list_t));
   assert(ret);
-  (*ret).array = malloc(sizeof(uint32_t) * size);
-  assert((*ret).array);
-  (*ret).size = size;
-  (*ret).nEle = 0;
+  (*ret).head = NULL;
+  (*ret).size = 0;
   return ret;
 }
 
-void destryList(list_t **pPL) {
-  free((*pPL)->array);
-  free((*pPL));
-  return;
+void destryList(list_t **pList) {
+  nodeList_t *aux;
+  while (((*pList)->head) != NULL) {
+    aux = (*pList)->head;
+    (*pList)->head = (*pList)->head->next;
+    free(aux);
+  }
+  free(*pList);
 }
 
-uint32_t getElementAtList(list_t l, int index) {
-  assert(index < 0 ||
-         l.size > index);
-  return l.array[index];
-}
-
-void insertList(list_t *pL, uint32_t x) {
-  if ((*pL).size + 1 >= (*pL).size) resize(pL);
-  (*pL).array[(*pL).nEle] = x;
-  (*pL).nEle += 1;
-  return;
-}
-
-small_t getSizeList(list_t l) {
-  return l.nEle;
-}
-small_t getMaxSizeList(list_t l) {
+small_t getNElemList(list_t l) {
   return l.size;
 }
 
-void resize(list_t *pL) {
-  assert(pL);
-  uint32_t *aux;
-  aux = realloc((*pL).array, sizeof(uint32_t) * ((*pL).size * 2));
-  assert(aux);
-  (*pL).array = aux;
-  (*pL).size *= 2;
+void insertList(list_t *pL, uint32_t val) {
+  nodeList_t *node;
+  node = malloc(sizeof(nodeList_t));
+  assert(node);
+  node->element = val;
+  node->next = NULL;
+  if (pL->head != NULL) {
+    nodeList_t *aux;
+    aux = pL->head;
+    while (aux->next != NULL) {
+      aux = aux->next;
+    }
+    aux->next = node;
+  } else {
+    pL->head = node;
+  }
+  return;
+}
+
+uint32_t getElementAtList(list_t l, unsigned int n) {
+  nodeList_t *aux;
+  aux = l.head;
+  for (small_t i = 0; i < n; ++i) {
+    aux = aux->next;
+  }
+  return aux->element;
 }
