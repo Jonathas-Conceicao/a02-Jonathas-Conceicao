@@ -3,11 +3,10 @@
 #include <assert.h>
 
 #include "memvirt.h"
-#include "cicQueue.c" // Tu sabes porque isso ta feio assim.
+#include "queue.c" // Tu sabes porque isso ta feio assim.
 #include "list.c" // Tu sabes porque isso ta feio assim.
 
 typedef struct result result_t;
-typedef unsigned short int small_t;
 
 typedef struct commnad_ {
   int pid;
@@ -16,7 +15,8 @@ typedef struct commnad_ {
 }command_t;
 
 typedef struct process_ {
-  cicQueue_t *queue;
+  queue_t *queue;
+  uint32_t opExecuted;
   uint32_t workingSet;
 }process_t;
 
@@ -33,50 +33,33 @@ struct result * memvirt(int num_procs, uint32_t num_frames, char * filename, uin
   FILE *file;
   command_t cmd;
   process_t **process; // List of pointers
-  list_t *wsList;
-
-  wsList = initList(num_procs);
-  ret = initResult(num_procs);
-  file = fopen(filename, "r");
-  assert(file);
+  small_t r;
   process = malloc(sizeof(process_t *) * num_procs);
   assert(process);
+  ret = initResult(num_procs);
+  assert(ret);
   for (small_t i = 0; i < num_procs; ++i) {
-    process[i] = initProcess((int) (num_frames/num_procs));
-    process[i]->workingSet = (int) (num_frames/num_procs); // Initinal value of working sets
-    insertList(wsList, (int) (num_frames/num_procs));
+    process[i] = initProcess(num_frames/num_procs);
   }
-  interval = 0;
-  uint32_t i = 0;
-  int r;
+
+  (void)interval;
+  file = fopen(filename, "r");
+  assert(file);
   while (!feof(file)) {
     cmd = getCommand(file);
     if (cmd.control > 0) { // Check if read was sucessfull
-      if (i==interval) {
-        resizeQueue(&process[cmd.pid]->queue, 0);
-        i = 0;
-        for (small_t i = 0; i < num_procs; ++i) { // Updates number of frames for each process
-        }
-      }
-      r = accessPage(process[cmd.pid]->queue, cmd.pageNum);
+      r = accessPageQueue(process[cmd.pid]->queue, cmd.pageNum); // Returns 0 if read was sucessfull, 1 if it's a page fault
       (*ret).refs[cmd.pid]++;
       if (r) {
         (*ret).pfs[cmd.pid]++;
+        insertPageQueue(process[cmd.pid]->queue, cmd.pageNum);
       }
-      i++;
     }
   }
 
-  for (small_t i = 0; i < getSizeList(*wsList); ++i) {
-    (*ret).avg_ws += getElementAtList(*wsList, i);
-  }
-  (*ret).avg_ws /= getSizeList(*wsList);
-
   for (small_t i = 0; i < num_procs; ++i) {
-    (*ret).pf_rate[i] = ((float) (*ret).pfs[i]/(*ret).refs[i]) * 100;
     destryProcess(&process[i]);
   }
-  destryList(&wsList);
   free(process);
   fclose(file);
   return ret;
@@ -102,11 +85,13 @@ void destryProcess(process_t **p) {
 }
 
 process_t *initProcess(int ws) {
+  if (ws < 1) ws = 1;
   process_t *ret;
   ret = malloc(sizeof(process_t));
   assert(ret);
   (*ret).queue = initQueue(ws);
   (*ret).workingSet = ws;
+  (*ret).opExecuted = 0;
   return ret;
 }
 

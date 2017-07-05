@@ -1,8 +1,8 @@
+#ifndef _QUEUE_H_
+#define _QUEUE_H_
+
 #include <stdlib.h>
 #include <assert.h>
-
-#ifndef _queue_H_
-#define _queue_H_
 
 #ifndef _SMALL_T_
 #define _SMALL_T_
@@ -72,12 +72,12 @@ nodeQueue_t *initNodeQueue(int page, nodeQueue_t *n, nodeQueue_t *p) {
   assert(ret);
   ret->element.pageNum = page;
   ret->element.refBit = 1;
-  if (!n) {
+  if (n) {
     ret->next = n;
   } else {
     ret->next = ret;
   }
-  if (!p) {
+  if (p) {
     ret->prev = p;
   } else {
     ret->prev = ret;
@@ -151,13 +151,14 @@ void removePageQueue(queue_t *pQ) {
 }
 int accessPageQueue(queue_t *pQ, int page) {
   nodeQueue_t *aux;
+  if (pQ->head == NULL) return 1;
   aux = pQ->head;
   do {
     if (aux->element.pageNum == page) {
       aux->element.refBit = 1;
-      return 0;
+      return 0; // If page was found
     }
     aux = aux->next;
-  } while(aux != pQ->head);
+  } while(aux != pQ->head && aux != NULL);
   return 1;
 }
