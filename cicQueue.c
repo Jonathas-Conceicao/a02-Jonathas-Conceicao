@@ -1,135 +1,163 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 
-#ifndef _CICQUEUE_H_
-#define _CICQUEUE_H_
+#ifndef _queue_H_
+#define _queue_H_
 
 #ifndef _SMALL_T_
 #define _SMALL_T_
 typedef unsigned short int small_t;
 #endif
 
-typedef struct element_ {
+typedef struct elementQueue_ {
   signed int pageNum;
-  char bitRef; //
-}element_t;
+  char refBit; //
+}elementQueue_t;
 
-typedef struct cicQueue_ {
-  element_t *list;
-  small_t arrow;
+typedef struct nodeQueue_ {
+  elementQueue_t element;
+  struct nodeQueue_ *next;
+  struct nodeQueue_ *prev;
+}nodeQueue_t;
+
+typedef struct queue_ {
+  nodeQueue_t *head;
+  nodeQueue_t *arrow;
   small_t nEle;
-  small_t size;
-}cicQueue_t;
+  small_t maxSize;
+}queue_t;
 
-cicQueue_t *initQueue(int);
-void destryQueue(cicQueue_t **);
-void resizeQueue(cicQueue_t**, signed int);
-void removeNElements(cicQueue_t**, unsigned int);
-void increaceInNElements(cicQueue_t**, unsigned int);
+queue_t *initQueue(int);
+void destryQueue(queue_t **);
+nodeQueue_t *initNodeQueue(int, nodeQueue_t*, nodeQueue_t*);
 
-void insertPage(cicQueue_t *q, int page);
-int findPage(cicQueue_t *, int);
-void setArrowPos(cicQueue_t *);
+void setArrowPosQueue(queue_t *);
 
-int accessPage(cicQueue_t *, int);
+void resizeQueue(queue_t*, signed int);
+static void removeNElements(queue_t*, unsigned int);
+static void increaceInNElements(queue_t*, unsigned int);
+
+void insertPageQueue(queue_t *, int);
+void removePageQueue(queue_t *);
+int findPageQueue(queue_t *, int);
+
+int accessPageQueue(queue_t *, int);
 
 #endif
 
-int accessPage(cicQueue_t *q, int page) {
-  int aux;
-  aux = findPage(q, page);
-  if (aux >= 0) { // Page was in the list.
-    (*q).list[aux].bitRef = 1; // Reset the reference bit.
-    return 0; // Nothing more to do.
-  }
-  insertPage(q, page);
-  return 1;
-}
-
-void insertPage(cicQueue_t *q, int page) {
-  setArrowPos(q); // Look for a propper slot.
-  (*q).list[(*q).arrow].pageNum = page;
-  (*q).list[(*q).arrow].bitRef = 1;
-  (*q).arrow++;
-  (*q).nEle++;
-  if ((*q).arrow >= (*q).size)
-    (*q).arrow = 0;
-  return;
-}
-
-void setArrowPos(cicQueue_t *q) { // Looks for a propper slot.
-  while((*q).list[(*q).arrow].bitRef != 0) {
-    (*q).list[(*q).arrow].bitRef = 0; // Gives a second chance.
-    (*q).arrow++; // Goes to next position,
-    if ((*q).arrow >= (*q).size) (*q).arrow = 0;
-  }
-  if ((*q).list[(*q).arrow].pageNum != -1) (*q).nEle--; // If page was not empty we are removing an element
-  return;
-}
-
-int findPage(cicQueue_t *q, int page) {
-  for (small_t i = 0; i < (*q).size; ++i) {
-    if ((*q).list[i].pageNum == page)
-      return i;
-  }
-  return -1;
-}
-
-void destryQueue(cicQueue_t **pQ) {
-  free((*pQ)->list);
-  free(*pQ);
-  return;
-}
-
-void removeNElements(cicQueue_t **q, unsigned int numOfElements) {
-  assert(*q);
-  if (numOfElements == 0) return;
-  setArrowPos(*q);
-  for (small_t i = (*q)->arrow; i < ((*q)->size -1); ++i) { // Pull all elements to the end one position behind
-    (*q)->list[i].pageNum = (*q)->list[i+1].pageNum;
-    (*q)->list[i].bitRef = (*q)->list[i+1].bitRef;
-  }
-  element_t *aux;
-  aux = realloc((*q)->list, sizeof(element_t) * ((*q)->size - 1)); // Resize's list o size-1
-  assert(aux);
-  (*q)->list = aux;
-  (*q)->size -=  1;
-  removeNElements(q, (numOfElements - 1)); // Just because recursion is fun
-}
-
-void increaceInNElements(cicQueue_t **q, unsigned int numOfElements) {
-  assert(*q);
-  element_t *aux;
-  aux = realloc((*q)->list, sizeof(element_t) * ((*q)->size + numOfElements));
-  assert(aux);
-  (*q)->list = aux;
-  for (unsigned int i = ((*q)->size)-1; i < ((*q)->size + numOfElements); ++i) { // Inicializar novas posições
-    (*q)->list[i].pageNum = -1; // Valor default para representar espaço vazio
-    (*q)->list[i].bitRef = 0;
-  }
-  (*q)->size += numOfElements;
-  (*q)->arrow = (*q)->size-1;
-  return;
-}
-
-void resizeQueue(cicQueue_t **q, signed int resizeValue) {
-  (resizeValue > 0) ? increaceInNElements(q, abs(resizeValue)) : removeNElements(q, abs(resizeValue));
-  return;
-}
-
-cicQueue_t *initQueue(int size) {
-  cicQueue_t *ret;
-  ret = malloc(sizeof(cicQueue_t));
+queue_t *initQueue(int inicialSize) {
+  queue_t *ret;
+  ret = malloc(sizeof(queue_t));
   assert(ret);
-  (*ret).list = malloc(sizeof(element_t) * size);
-  assert((*ret).list);
-  for (small_t i = 0; i < size; ++i) {
-    (*ret).list[i].pageNum = -1; // Valor default para representar espaço vazio
-    (*ret).list[i].bitRef = 0;
-  }
-  (*ret).arrow = 0;
-  (*ret).nEle = 0;
-  (*ret).size = size;
+  ret->head = NULL;
+  ret->arrow = NULL;
+  ret->nEle = 0;
+  ret->maxSize = inicialSize;
   return ret;
+}
+void destryQueue(queue_t **ppQueue) {
+  nodeQueue_t *aux;
+  (*ppQueue)->head->prev->next = NULL; //Makes the last element point to NULL
+  while (((*ppQueue)->head) != NULL) {
+    aux = (*ppQueue)->head;
+    (*ppQueue)->head = (*ppQueue)->head->next;
+    free(aux);
+  }
+  free(*ppQueue);
+  return;
+}
+nodeQueue_t *initNodeQueue(int page, nodeQueue_t *n, nodeQueue_t *p) {
+  nodeQueue_t *ret;
+  ret = malloc(sizeof(nodeQueue_t));
+  assert(ret);
+  ret->element.pageNum = page;
+  ret->element.refBit = 1;
+  if (!n) {
+    ret->next = n;
+  } else {
+    ret->next = ret;
+  }
+  if (!p) {
+    ret->prev = p;
+  } else {
+    ret->prev = ret;
+  }
+  return ret;
+}
+
+void setArrowPosQueue(queue_t *pQ) {
+  if (pQ->head != NULL) {
+    while (pQ->arrow->element.refBit != 0) {
+      pQ->arrow->element.refBit = 0;
+      pQ->arrow = pQ->arrow->next;
+    }
+  }
+  return;
+}
+
+void resizeQueue(queue_t *pQ, signed int size) {
+  if (size < 0) {
+    removeNElements(pQ, abs(size));
+  } else {
+    increaceInNElements(pQ, abs(size));
+  }
+  return;
+}
+static void increaceInNElements(queue_t *pQ, unsigned int n) {
+  pQ->maxSize += n;
+  return;
+}
+static void removeNElements(queue_t *pQ, unsigned int n) {
+  for (small_t i = pQ->maxSize; i > (pQ->maxSize - n); --i) {
+    setArrowPosQueue(pQ);
+    removePageQueue(pQ);
+  }
+  return;
+}
+
+void insertPageQueue(queue_t *pQ, int page) {
+  if (pQ->head != NULL) {
+    if (pQ->nEle < pQ->maxSize) {
+      nodeQueue_t *newNode;
+      newNode = initNodeQueue(page, pQ->arrow, pQ->arrow->prev);
+      pQ->arrow->prev->next = newNode;
+      pQ->arrow->prev = newNode;
+      pQ->nEle++;
+    } else {
+      setArrowPosQueue(pQ);
+      pQ->arrow->element.pageNum = page;
+      pQ->arrow->element.refBit = 1;
+    }
+  } else {
+    nodeQueue_t *newNode;
+    newNode = initNodeQueue(page, NULL, NULL);
+    pQ->arrow = newNode;
+    pQ->head = newNode;
+    pQ->nEle++;
+  }
+  return;
+}
+void removePageQueue(queue_t *pQ) {
+  assert(pQ->head == NULL);
+  assert(pQ->nEle > 1);
+  nodeQueue_t *toFree;
+  toFree = pQ->arrow;
+  pQ->arrow->prev->next = pQ->arrow->next;
+  pQ->arrow->next->prev = pQ->arrow->prev;
+  pQ->arrow = pQ->arrow->next;
+  free(toFree);
+  pQ->nEle--;
+  pQ->maxSize--;
+}
+int accessPageQueue(queue_t *pQ, int page) {
+  nodeQueue_t *aux;
+  aux = pQ->head;
+  do {
+    if (aux->element.pageNum == page) {
+      aux->element.refBit = 1;
+      return 0;
+    }
+    aux = aux->next;
+  } while(aux != pQ->head);
+  return 1;
 }

@@ -22,6 +22,7 @@ typedef struct list_ {
 
 list_t *initList();
 void destryList(list_t **);
+nodeList_t *initNodeList(uint32_t);
 
 small_t getNElemList(list_t);
 small_t getMaxSizeList(list_t);
@@ -55,21 +56,30 @@ small_t getNElemList(list_t l) {
   return l.size;
 }
 
+nodeList_t *initNodeList(uint32_t val) {
+  nodeList_t *ret;
+  ret = malloc(sizeof(nodeList_t));
+  assert(ret);
+  ret->element = val;
+  ret->next = NULL;
+  return ret;
+}
+
 void insertList(list_t *pL, uint32_t val) {
-  nodeList_t *node;
-  node = malloc(sizeof(nodeList_t));
-  assert(node);
-  node->element = val;
-  node->next = NULL;
   if (pL->head != NULL) {
     nodeList_t *aux;
     aux = pL->head;
-    while (aux->next != NULL) {
+    while (aux->next != NULL && aux->element != val) {
       aux = aux->next;
     }
-    aux->next = node;
+    if (aux->element == val) return;
+    nodeList_t *newNode;
+    newNode = initNodeList(val);
+    aux->next = newNode;
   } else {
-    pL->head = node;
+    nodeList_t *newNode;
+    newNode = initNodeList(val);
+    pL->head = newNode;
   }
   return;
 }
