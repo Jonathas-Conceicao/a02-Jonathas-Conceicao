@@ -16,8 +16,7 @@ typedef struct commnad_ {
 
 typedef struct process_ {
   queue_t *queue;
-  uint32_t opExecuted;
-  uint32_t workingSet;
+  list_t  *pagesAccessed;
 }process_t;
 
 result_t *initResult(int);
@@ -28,7 +27,7 @@ void destryProcess(process_t **);
 
 command_t getCommand(FILE *);
 
-struct result * memvirt(int num_procs, uint32_t num_frames, char * filename, uint32_t interval) {
+struct result *memvirt(int num_procs, uint32_t num_frames, char * filename, uint32_t interval) {
   result_t *ret;
   FILE *file;
   command_t cmd;
@@ -42,19 +41,26 @@ struct result * memvirt(int num_procs, uint32_t num_frames, char * filename, uin
     process[i] = initProcess(num_frames/num_procs);
   }
 
-  (void)interval;
   file = fopen(filename, "r");
   assert(file);
+  small_t interator = 0;
   while (!feof(file)) {
+    if (interator >= interval) {
+      interator = 0;
+      for (small_t i = 0; i < num_procs; ++i) {
+      }
+    }
     cmd = getCommand(file);
     if (cmd.control > 0) { // Check if read was sucessfull
       r = accessPageQueue(process[cmd.pid]->queue, cmd.pageNum); // Returns 0 if read was sucessfull, 1 if it's a page fault
-      (*ret).refs[cmd.pid]++;
+      ret->refs[cmd.pid]++;
       if (r) {
-        (*ret).pfs[cmd.pid]++;
+        ret->pfs[cmd.pid]++;
         insertPageQueue(process[cmd.pid]->queue, cmd.pageNum);
       }
+      r = insertList(process[cmd.pid]->pagesAccessed, cmd.pageNum); // Returns 0 if pageNum is already in the list, 1 if it was inserted;
     }
+    interator++;
   }
 
   for (small_t i = 0; i < num_procs; ++i) {
@@ -89,9 +95,8 @@ process_t *initProcess(int ws) {
   process_t *ret;
   ret = malloc(sizeof(process_t));
   assert(ret);
-  (*ret).queue = initQueue(ws);
-  (*ret).workingSet = ws;
-  (*ret).opExecuted = 0;
+  ret->queue = initQueue(ws);
+  ret->pagesAccessed = initList();
   return ret;
 }
 
@@ -100,19 +105,19 @@ result_t *initResult(int qntProc) {
   ret = malloc(sizeof(result_t));
   assert(ret);
 
-  (*ret).refs = malloc(sizeof(uint32_t) * qntProc);
-  assert((*ret).refs);
-  (*ret).pfs = malloc(sizeof(uint32_t) * qntProc);
-  assert((*ret).pfs);
-  (*ret).pf_rate = malloc(sizeof(float) * qntProc);
-  assert((*ret).pf_rate);
+  ret->refs = malloc(sizeof(uint32_t) * qntProc);
+  assert(ret->refs);
+  ret->pfs = malloc(sizeof(uint32_t) * qntProc);
+  assert(ret->pfs);
+  ret->pf_rate = malloc(sizeof(float) * qntProc);
+  assert(ret->pf_rate);
   for (small_t i = 0; i < qntProc; ++i) {
-    (*ret).refs[i] = 0;
-    (*ret).pfs[i] = 0;
-    (*ret).pf_rate[i] = 0;
+    ret->refs[i] = 0;
+    ret->pfs[i] = 0;
+    ret->pf_rate[i] = 0;
   }
-  (*ret).avg_ws = 0;
-  (*ret).total_pf_rate = 0.0;
+  ret->avg_ws = 0;
+  ret->total_pf_rate = 0.0;
 
   return ret;
 }

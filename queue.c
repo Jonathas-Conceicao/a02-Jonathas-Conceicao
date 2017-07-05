@@ -127,6 +127,7 @@ void insertPageQueue(queue_t *pQ, int page) {
       setArrowPosQueue(pQ);
       pQ->arrow->element.pageNum = page;
       pQ->arrow->element.refBit = 1;
+      pQ->arrow = pQ->arrow->next;
     }
   } else {
     nodeQueue_t *newNode;

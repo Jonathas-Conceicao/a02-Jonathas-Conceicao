@@ -1,9 +1,9 @@
+#ifndef _LIST_H_
+#define _LIST_H_
+
 #include <stdint.h>
 #include <stdlib.h>
 #include <assert.h>
-
-#ifndef _LIST_H_
-#define _LIST_H_
 
 #ifndef _SMALL_T_
 #define _SMALL_T_
@@ -27,7 +27,7 @@ nodeList_t *initNodeList(uint32_t);
 small_t getNElemList(list_t);
 small_t getMaxSizeList(list_t);
 
-void insertList(list_t *, uint32_t);
+int insertList(list_t *, uint32_t);
 uint32_t getElementAtList(list_t, unsigned int);
 
 #endif
@@ -65,14 +65,14 @@ nodeList_t *initNodeList(uint32_t val) {
   return ret;
 }
 
-void insertList(list_t *pL, uint32_t val) {
+int insertList(list_t *pL, uint32_t val) {
   if (pL->head != NULL) {
     nodeList_t *aux;
     aux = pL->head;
     while (aux->next != NULL && aux->element != val) {
       aux = aux->next;
     }
-    if (aux->element == val) return;
+    if (aux->element == val) return 0;
     nodeList_t *newNode;
     newNode = initNodeList(val);
     aux->next = newNode;
@@ -81,7 +81,7 @@ void insertList(list_t *pL, uint32_t val) {
     newNode = initNodeList(val);
     pL->head = newNode;
   }
-  return;
+  return 1;
 }
 
 uint32_t getElementAtList(list_t l, unsigned int n) {
