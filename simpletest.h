@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #define KNRM  "\x1B[0m"
 #define KRED  "\x1B[31m"
@@ -123,6 +124,18 @@ void isLesserThan(int num, int value, int points) {
 		printf("%s        NOT PASSED!\n        got: %d < %d %s\n",KRED, num, value, KNRM);
 	}
 }
+
+void isNear(float num, float value, int points){
+	currmaxgrade+=points;
+	/* check for nearest integers */
+	if ((num >= floor(value))&& (num <= ceil(value))){
+		printf("%s        PASSED!\n%s", KGRN, KNRM);
+		grade+=points;
+	}else {
+		printf("%s        NOT PASSED!\n        got: %f , expecting %f %s\n",KRED, num, value, KNRM);
+	}
+}
+
 
 
 #endif //_SIMPLETEST_H
