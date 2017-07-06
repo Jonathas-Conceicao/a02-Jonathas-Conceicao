@@ -24,11 +24,11 @@ list_t *initList();
 void destryList(list_t **);
 nodeList_t *initNodeList(uint32_t);
 
-small_t getNElemList(list_t);
-small_t getMaxSizeList(list_t);
+small_t getNElemList(list_t*);
 
 int insertList(list_t *, uint32_t);
-uint32_t getElementAtList(list_t, unsigned int);
+void insertForcedList(list_t *, uint32_t);
+uint32_t getElementAtList(list_t *, unsigned int);
 
 #endif
 
@@ -52,8 +52,8 @@ void destryList(list_t **pList) {
   free(*pList);
 }
 
-small_t getNElemList(list_t l) {
-  return l.size;
+small_t getNElemList(list_t *pL) {
+  return pL->size;
 }
 
 nodeList_t *initNodeList(uint32_t val) {
@@ -81,12 +81,31 @@ int insertList(list_t *pL, uint32_t val) {
     newNode = initNodeList(val);
     pL->head = newNode;
   }
+  pL->size++;
   return 1;
 }
 
-uint32_t getElementAtList(list_t l, unsigned int n) {
+void insertForcedList(list_t *pL, uint32_t val) {
+  nodeList_t *newNode;
+  newNode = initNodeList(val);
+  if (pL->head != NULL) {
+    nodeList_t *aux;
+    aux = pL->head;
+    while (aux->next != NULL) {
+      aux = aux->next;
+    }
+    aux->next = newNode;
+  } else {
+    pL->head = newNode;
+  }
+  pL->size++;
+  return;
+}
+
+uint32_t getElementAtList(list_t *pL, unsigned int n) {
+  // assert(n > pL->size);
   nodeList_t *aux;
-  aux = l.head;
+  aux = pL->head;
   for (small_t i = 0; i < n; ++i) {
     aux = aux->next;
   }

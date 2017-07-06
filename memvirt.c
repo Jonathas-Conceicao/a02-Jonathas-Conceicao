@@ -24,6 +24,7 @@ result_t *initResult(int);
 
 process_t *initProcess(int);
 void destryProcess(process_t **);
+uint32_t getCurrentWorkingSet(process_t);
 
 command_t getCommand(FILE *);
 
@@ -32,6 +33,7 @@ struct result *memvirt(int num_procs, uint32_t num_frames, char * filename, uint
   FILE *file;
   command_t cmd;
   process_t **process; // List of pointers
+  list_t *wsList;
   small_t r;
   process = malloc(sizeof(process_t *) * num_procs);
   assert(process);
@@ -40,6 +42,7 @@ struct result *memvirt(int num_procs, uint32_t num_frames, char * filename, uint
   for (small_t i = 0; i < num_procs; ++i) {
     process[i] = initProcess(num_frames/num_procs);
   }
+  wsList = initList();
 
   file = fopen(filename, "r");
   assert(file);
@@ -48,6 +51,7 @@ struct result *memvirt(int num_procs, uint32_t num_frames, char * filename, uint
     if (interator >= interval) {
       interator = 0;
       for (small_t i = 0; i < num_procs; ++i) {
+        insertForcedList(wsList, getCurrentWorkingSet(*process[i])); // Insert allowing repetition of value
       }
     }
     cmd = getCommand(file);
@@ -63,9 +67,26 @@ struct result *memvirt(int num_procs, uint32_t num_frames, char * filename, uint
     interator++;
   }
 
+  float total_pf = 0; // Declared as float to avoid casting later
+  int total_ref = 0;
   for (small_t i = 0; i < num_procs; ++i) {
+    // Get working set
+    insertForcedList(wsList, getCurrentWorkingSet(*process[i])); // Insert allowing repetition of value
+    // Pf rate for each process
+    ret->pf_rate[i] = (((float) ret->pfs[i]) / ret->refs[i]);
+    // Acumulate to calculate total pf rate later
+    total_pf += ret->pfs[i];
+    total_ref += ret->refs[i];
     destryProcess(&process[i]);
   }
+  // Total PF rate
+  ret->total_pf_rate = (total_pf / total_ref);
+  // Avarege working set of hole simulation
+  small_t nOfWS = getNElemList(wsList);
+  for (small_t i = 0; i < nOfWS; ++i) {
+    ret->avg_ws += getElementAtList(wsList, i); // Sum all elements
+  }
+  ret->avg_ws /= nOfWS; // Divide by number of elements
   free(process);
   fclose(file);
   return ret;
@@ -83,6 +104,10 @@ command_t getCommand(FILE *f) {
 //   free((*pR)->pf_rate);
 //   free(*pR);
 // }
+
+uint32_t getCurrentWorkingSet(process_t p) {
+  return p.queue->maxSize;
+}
 
 void destryProcess(process_t **p) {
   destryQueue(&(*p)->queue);
