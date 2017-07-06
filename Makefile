@@ -11,7 +11,7 @@ teste: memvirt.o teste.c
 	$(CC) $(CFLAGS) teste.c memvirt.o -o teste -lm
 
 proftest: memvirt.o proftest.c
-
+	$(CC) $(CFLAGS) proftest.c memvirt.o -o proftest -lm
 
 test: teste
 	./teste
