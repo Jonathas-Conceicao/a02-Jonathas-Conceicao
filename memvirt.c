@@ -49,8 +49,18 @@ struct result *memvirt(int num_procs, uint32_t num_frames, char * filename, uint
   while (!feof(file)) {
     if (interator >= interval) {
       interator = 0;
+      int currWSofP;
+      int totalWSofI = 0;
       for (small_t i = 0; i < num_procs; ++i) {
-        insertForcedList(wsList, getCurrentWorkingSet(process[i]->queue)); // Insert allowing repetition of value
+        currWSofP = getCurrentWorkingSet(process[i]->queue);
+        totalWSofI += currWSofP;
+        insertForcedList(wsList, currWSofP); // Insert allowing repetition of value
+      }
+      int newMaxSize;
+      for (small_t i = 0; i < num_procs; ++i) {
+        currWSofP = getCurrentWorkingSet(process[i]->queue);
+        newMaxSize = ((float) currWSofP/totalWSofI) * num_frames;
+        setNewMaxSize(process[i]->queue, newMaxSize);
         setAllRefTo0(process[i]->queue);
       }
     }
