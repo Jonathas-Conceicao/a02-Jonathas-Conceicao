@@ -3,8 +3,8 @@
 #include <assert.h>
 
 #include "memvirt.h"
-#include "queue.c" // Tu sabes porque isso ta feio assim.
-#include "list.c" // Tu sabes porque isso ta feio assim.
+#include "queue.c"
+#include "list.c"
 
 typedef struct result result_t;
 
@@ -16,7 +16,7 @@ typedef struct commnad_ {
 
 typedef struct process_ {
   queue_t *queue;
-  list_t  *pagesAccessed;
+  // list_t  *pagesAccessed;
 }process_t;
 
 result_t *initResult(int);
@@ -24,7 +24,6 @@ result_t *initResult(int);
 
 process_t *initProcess(int);
 void destryProcess(process_t **);
-uint32_t getCurrentWorkingSet(process_t);
 
 command_t getCommand(FILE *);
 
@@ -51,7 +50,8 @@ struct result *memvirt(int num_procs, uint32_t num_frames, char * filename, uint
     if (interator >= interval) {
       interator = 0;
       for (small_t i = 0; i < num_procs; ++i) {
-        insertForcedList(wsList, getCurrentWorkingSet(*process[i])); // Insert allowing repetition of value
+        insertForcedList(wsList, getCurrentWorkingSet(process[i]->queue)); // Insert allowing repetition of value
+        setAllRefTo0(process[i]->queue);
       }
     }
     cmd = getCommand(file);
@@ -62,17 +62,14 @@ struct result *memvirt(int num_procs, uint32_t num_frames, char * filename, uint
         ret->pfs[cmd.pid]++;
         insertPageQueue(process[cmd.pid]->queue, cmd.pageNum);
       }
-      r = insertList(process[cmd.pid]->pagesAccessed, cmd.pageNum); // Returns 0 if pageNum is already in the list, 1 if it was inserted;
+      // r = insertList(process[cmd.pid]->pagesAccessed, cmd.pageNum); // Returns 0 if pageNum is already in the list, 1 if it was inserted;
+      interator++;
     }
-    interator++;
   }
 
   float total_pf = 0; // Declared as float to avoid casting later
   int total_ref = 0;
   for (small_t i = 0; i < num_procs; ++i) {
-    // Get working set
-    insertForcedList(wsList, getCurrentWorkingSet(*process[i])); // Insert allowing repetition of value
-    // Pf rate for each process
     ret->pf_rate[i] = (((float) ret->pfs[i]) / ret->refs[i]);
     // Acumulate to calculate total pf rate later
     total_pf += ret->pfs[i];
@@ -105,10 +102,6 @@ command_t getCommand(FILE *f) {
 //   free(*pR);
 // }
 
-uint32_t getCurrentWorkingSet(process_t p) {
-  return p.queue->maxSize;
-}
-
 void destryProcess(process_t **p) {
   destryQueue(&(*p)->queue);
   free(*p);
@@ -121,7 +114,7 @@ process_t *initProcess(int ws) {
   ret = malloc(sizeof(process_t));
   assert(ret);
   ret->queue = initQueue(ws);
-  ret->pagesAccessed = initList();
+  // ret->pagesAccessed = initList();
   return ret;
 }
 

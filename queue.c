@@ -32,16 +32,17 @@ void destryQueue(queue_t **);
 nodeQueue_t *initNodeQueue(int, nodeQueue_t*, nodeQueue_t*);
 
 void setArrowPosQueue(queue_t *);
+void setAllRefTo0(queue_t *);
 
-void resizeQueue(queue_t*, signed int);
-static void removeNElements(queue_t*, unsigned int);
-static void increaceInNElements(queue_t*, unsigned int);
+void setNewMaxSize(queue_t *, unsigned int); 
+void removeNElements(queue_t *, unsigned int);
 
 void insertPageQueue(queue_t *, int);
-void removePageQueue(queue_t *);
+static void removePageQueue(queue_t *);
 int findPageQueue(queue_t *, int);
 
 int accessPageQueue(queue_t *, int);
+uint32_t getCurrentWorkingSet(queue_t *);
 
 #endif
 
@@ -94,20 +95,24 @@ void setArrowPosQueue(queue_t *pQ) {
   }
   return;
 }
-
-void resizeQueue(queue_t *pQ, signed int size) {
-  if (size < 0) {
-    removeNElements(pQ, abs(size));
-  } else {
-    increaceInNElements(pQ, abs(size));
+void setAllRefTo0(queue_t *pQ) {
+  if (pQ->head != NULL) {
+    nodeQueue_t *aux;
+    aux = pQ->head;
+    do {
+      aux->element.refBit = 0;
+      aux = aux->next;
+    } while(aux != pQ->head);
   }
   return;
 }
-static void increaceInNElements(queue_t *pQ, unsigned int n) {
-  pQ->maxSize += n;
+
+void setNewMaxSize(queue_t *pQ, unsigned int newMaxSize) {
+  pQ->maxSize = newMaxSize;
   return;
 }
-static void removeNElements(queue_t *pQ, unsigned int n) {
+
+void removeNElements(queue_t *pQ, unsigned int n) {
   for (small_t i = pQ->maxSize; i > (pQ->maxSize - n); --i) {
     setArrowPosQueue(pQ);
     removePageQueue(pQ);
@@ -138,7 +143,7 @@ void insertPageQueue(queue_t *pQ, int page) {
   }
   return;
 }
-void removePageQueue(queue_t *pQ) {
+static void removePageQueue(queue_t *pQ) {
   assert(pQ->head == NULL);
   assert(pQ->nEle > 1);
   nodeQueue_t *toFree;
@@ -150,16 +155,30 @@ void removePageQueue(queue_t *pQ) {
   pQ->nEle--;
   pQ->maxSize--;
 }
+
 int accessPageQueue(queue_t *pQ, int page) {
   nodeQueue_t *aux;
-  if (pQ->head == NULL) return 1;
-  aux = pQ->head;
-  do {
-    if (aux->element.pageNum == page) {
-      aux->element.refBit = 1;
-      return 0; // If page was found
-    }
-    aux = aux->next;
-  } while(aux != pQ->head && aux != NULL);
+  if (pQ->head != NULL) {
+    aux = pQ->head;
+    do {
+      if (aux->element.pageNum == page) {
+        aux->element.refBit = 1;
+        return 0; // If page was found
+      }
+      aux = aux->next;
+    } while(aux != pQ->head && aux != NULL);
+  }
   return 1;
+}
+uint32_t getCurrentWorkingSet(queue_t *pQ) {
+  uint32_t ret = 0;
+  if (pQ->head != NULL) {
+    nodeQueue_t *aux;
+    aux = pQ->head;
+    do {
+      if (aux->element.refBit == 1) ret++;
+      aux = aux->next;
+    } while(aux != pQ->head);
+  }
+  return ret;
 }

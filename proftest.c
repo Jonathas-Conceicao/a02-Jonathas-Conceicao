@@ -64,7 +64,7 @@ void test_2_procs(){
 
   res = memvirt(2,4,"twoprocs.txt",4);
   WS(res, 2, 2);
-  PFRATE(res, .75, 1);
+  PFRATE(res, 0.444444, 1);
   if(res)
     free(res);
 }
