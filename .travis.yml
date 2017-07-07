@@ -13,4 +13,4 @@ addons:
 
 
 script:
-  - make alll
+  - make all
