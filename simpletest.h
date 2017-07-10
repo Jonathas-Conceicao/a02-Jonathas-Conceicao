@@ -36,11 +36,13 @@ void GRADEME(){
 	if (!maxgrade)
 		maxgrade = currmaxgrade;
 
+	int tmp = (int) ((grade / (float) maxgrade)*100);
+
 	if (grade < maxgrade*.7){
-		printf("You did %s %d %s out of %d\n", KRED, grade, KNRM, maxgrade);
+		printf("You did %s %d %s out of %d -- grade %d/100\n", KRED, grade, KNRM, maxgrade, tmp);
 	}
 	else{
-		printf("You did %s %d %s out of %d\n", KGRN, grade, KNRM, maxgrade);
+		printf("You did %s %d %s out of %d -- grade %d/100\n", KGRN, grade, KNRM, maxgrade, tmp);
 	}
 }
 
@@ -125,10 +127,12 @@ void isLesserThan(int num, int value, int points) {
 	}
 }
 
-void isNear(float num, float value, int points){
+/* because floating points ops are not commutative nor associative */
+void isNear(float num, float value, int decimals, int points){
 	currmaxgrade+=points;
+	float diff = fabs(num - value);
 	/* check for nearest integers */
-	if ((num >= floor(value))&& (num <= ceil(value))){
+	if (diff <= pow(10,(-decimals))) {
 		printf("%s        PASSED!\n%s", KGRN, KNRM);
 		grade+=points;
 	}else {

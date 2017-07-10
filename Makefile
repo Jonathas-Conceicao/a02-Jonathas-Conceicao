@@ -1,23 +1,21 @@
 CC=gcc
 
-CFLAGS=-g -O1 -std=c99 -pthread -Wall -Wextra -Werror
+CFLAGS=-g -O1 -std=c99 -Wall -Werrno
+LDFLAGS=-lm 
 
-all: test grade
 
-memvirt.o:
-	$(CC) $(CFLAGS) -c memvirt.c -o memvirt.o -lm
+all: grade 
 
-teste: memvirt.o teste.c
-	$(CC) $(CFLAGS) teste.c memvirt.o -o teste -lm
+memvirt.o: memvirt.c
 
-proftest: memvirt.o proftest.c
-	$(CC) $(CFLAGS) proftest.c memvirt.o -o proftest -lm
+test.o: test.c
 
-test: teste
-	./teste
+test: memvirt.o test.o
+	$(CC) $(CFLAGS) memvirt.o test.o -o test $(LDFLAGS)
 
-grade: proftest
-	./proftest
+
+grade: test
+	./test
 
 clean:
-	rm -rf *.o teste proftest
+	rm -rf *.o test
