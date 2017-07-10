@@ -34,7 +34,7 @@ nodeQueue_t *initNodeQueue(int, nodeQueue_t*, nodeQueue_t*);
 void setArrowPosQueue(queue_t *);
 void setAllRefTo0(queue_t *);
 
-void setNewMaxSize(queue_t *, unsigned int); 
+void setNewMaxSize(queue_t *, unsigned int);
 void removeNElements(queue_t *, unsigned int);
 
 void insertPageQueue(queue_t *, int);
@@ -58,11 +58,13 @@ queue_t *initQueue(int inicialSize) {
 }
 void destryQueue(queue_t **ppQueue) {
   nodeQueue_t *aux;
-  (*ppQueue)->head->prev->next = NULL; //Makes the last element point to NULL
-  while (((*ppQueue)->head) != NULL) {
-    aux = (*ppQueue)->head;
-    (*ppQueue)->head = (*ppQueue)->head->next;
-    free(aux);
+  if((*ppQueue)->head) {
+    (*ppQueue)->head->prev->next = NULL; //Makes the last element point to NULL
+    while (((*ppQueue)->head) != NULL) {
+      aux = (*ppQueue)->head;
+      (*ppQueue)->head = (*ppQueue)->head->next;
+      free(aux);
+    }
   }
   free(*ppQueue);
   return;
