@@ -1,0 +1,22 @@
+./test
+make: *** [grade] Segmentation fault: 11
+./test
+make: *** [grade] Segmentation fault: 11
+gcc -g -O1 -std=c99 -Wall -Werrno   -c -o test.o test.c
+warning: unknown warning option '-Werrno' [-Wunknown-warning-option]
+1 warning generated.
+gcc -g -O1 -std=c99 -Wall -Werrno memvirt.o test.o -o test -lm 
+./test
+make: *** [grade] Segmentation fault: 11
+./test
+make: *** [grade] Segmentation fault: 11
+./test
+make: *** [grade] Segmentation fault: 11
+./test
+make: *** [grade] Segmentation fault: 11
+./test
+make: *** [grade] Segmentation fault: 11
+./test
+make: *** [grade] Segmentation fault: 11
+./test
+make: *** [grade] Segmentation fault: 11
