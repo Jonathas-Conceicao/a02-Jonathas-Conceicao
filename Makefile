@@ -1,6 +1,6 @@
 CC=gcc
 
-CFLAGS=-g -O1 -std=c99 -Wall -Werrno
+CFLAGS=-g -O1 -std=c99 -Wall -Werror -Wextra
 LDFLAGS=-lm 
 
 
