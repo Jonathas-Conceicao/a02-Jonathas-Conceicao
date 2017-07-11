@@ -17,11 +17,11 @@ else isNotNull(a, c);
 
 
 void FREE(struct result * a){
-	if (a){ 
-		if (a->refs) 
-			free(a->refs); 
+	if (a){
+		if (a->refs)
+			free(a->refs);
 		if (a->pfs)
-			free(a->pfs); 
+			free(a->pfs);
 		if (a->pf_rate)
 			free(a->pf_rate);
 		free(a);
@@ -32,7 +32,7 @@ void FREE(struct result * a){
 
 void test_small(){
 	struct result * res;
-/* 
+/*
 0 0
 0 0
 0 0
@@ -56,7 +56,7 @@ void test_small(){
 
 void test_small2(){
 	struct result * res;
-/* 
+/*
 0 0
 0 1
 0 2
@@ -79,18 +79,18 @@ void test_small2(){
 
 void test_small3(){
 	struct result * res;
-/* 
+/*
 0 0 pf
 0 0
-0 0 
+0 0
 0 1 pf
 0 1
 0 2 pf
-0 1 
 0 1
 0 1
 0 1
-*/ 
+0 1
+*/
 
 	WHEN("Tenho apenas um processo, dois frames e 5 páginas sendo acessadas com repetições");
 
@@ -104,12 +104,12 @@ void test_small3(){
 
 void test_2_procs(){
 	struct result * res;
-/* 
+/*
 0 0
 0 1
 1 0
 1 1
-0 0 
+0 0
 0 1
 1 0
 1 1
@@ -119,7 +119,7 @@ void test_2_procs(){
 
 	res = memvirt(2,4,"twoprocs.txt",4);
 	THEN("Working sets iguais");
-	WS(res, 2, 2); 
+	WS(res, 2, 2);
 
 	THEN("Espero ter só pf compulsórios");
 	PFRATE(res, .4, 1);
@@ -145,7 +145,7 @@ void test_many_procs2(){
 	res = memvirt(4,20,"small2.txt",5);
 	THEN("Espero ter WS maior");
 
-	WS(res, 2, 1); 
+	WS(res, 2, 1);
 	THEN("Espero só ter pf");
 	PFRATE(res, 1, 1);
 	FREE(res);
@@ -153,25 +153,25 @@ void test_many_procs2(){
 
 void test_clock(){
 	struct result * res;
-/* 
+/*
 0 0 pf
-0 1 pf 
-0 2 pf
-0 3 pf 
-0 0 
-0 0 
-0 4 pf 
 0 1 pf
-6/8 = 
-*/ 
+0 2 pf
+0 3 pf
+0 0
+0 0
+0 4 pf
+0 1 pf
+6/8 =
+*/
 	WHEN("Tenho um processo, 4 frames e 5 páginas");
-	res = memvirt(1, 4, "clock.txt", 5); 
+	res = memvirt(1, 4, "clock.txt", 5);
 	THEN("Espero que a página 1 seja vítima e cause pf");
 	PFRATE(res, .75, 3);
 	FREE(res);
 }
 
-int main(int argc, char ** argv){
+int main(void){
 
 
 	test_small();
