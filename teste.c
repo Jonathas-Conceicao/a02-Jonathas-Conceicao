@@ -25,16 +25,16 @@ void test1(void) {
   isEqual(ret->refs[2], 4, 1);
   THEN("Todos os processos devem ter 2 page faults.");
   isEqual(ret->pfs[0], 2, 1);
-  isNear(ret->pf_rate[0], 0.400000, 1);
+  isNear(ret->pf_rate[0], 0.400000, 4, 1);
   isEqual(ret->pfs[1], 2, 1);
-  isNear(ret->pf_rate[1], 0.666666, 1);
+  isNear(ret->pf_rate[1], 0.666666, 4, 1);
   isEqual(ret->pfs[2], 2, 1);
-  isNear(ret->pf_rate[2], 0.500000, 1);
+  isNear(ret->pf_rate[2], 0.500000, 4, 1);
 
   THEN("O working set médio deve ser 2.");
   isEqual(ret->avg_ws, 2, 1);
   THEN("O total de page fault deve ser 50%.");
-  isNear(ret->total_pf_rate, 0.50, 1);
+  isNear(ret->total_pf_rate, 0.50, 4, 1);
 
   destryResult(&ret);
   return;
@@ -57,7 +57,7 @@ void test2(void) {
   THEN("Working set médio deve ser 2.");
   isEqual(ret->avg_ws, 2, 1);
   THEN("O total de page fault deve ser de 87.5%.");
-  isNear(ret->total_pf_rate, 0.87500, 1);
+  isNear(ret->total_pf_rate, 0.87500, 4, 1);
 }
 
 int main(int argc, char const *argv[]) {
